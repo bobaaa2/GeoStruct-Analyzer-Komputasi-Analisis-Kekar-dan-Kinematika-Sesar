@@ -77,8 +77,8 @@ if link_google_sheets:
         # MODE 1: KEKAR GERUS
         # ---------------------------------------------------------
         if Mode_Analisis == "Kekar Gerus Berpasangan (Conjugate Shear Joints)":
-            set1_strike, set1_dip = df['Strike_1'].dropna().values, df['Dip_1'].dropna().values
-            set2_strike, set2_dip = df['Strike_2'].dropna().values, df['Dip_2'].dropna().values
+            set1_strike, set1_dip = df['Strike_1'].dropna().astype(float).values, df['Dip_1'].dropna().astype(float).values
+            set2_strike, set2_dip = df['Strike_2'].dropna().astype(float).values, df['Dip_2'].dropna().astype(float).values
             
             vecs1 = np.array([strike_dip_to_pole_vector(s, d) for s, d in zip(set1_strike, set1_dip)])
             mean_v1_norm = np.sum(vecs1, axis=0) / np.linalg.norm(np.sum(vecs1, axis=0))
@@ -138,7 +138,7 @@ if link_google_sheets:
         # MODE 2: KEKAR EKSTENSI
         # ---------------------------------------------------------
         elif Mode_Analisis == "Kekar Ekstensi (Extension Joints)":
-            strike_ext, dip_ext = df['Strike_Ekstensi'].dropna().values, df['Dip_Ekstensi'].dropna().values
+            strike_ext, dip_ext = df['Strike_Ekstensi'].dropna().astype(float).values, df['Dip_Ekstensi'].dropna().astype(float).values
             has_plumose = 'Pitch_Plumose' in df.columns and not df['Pitch_Plumose'].dropna().empty
 
             vecs_ext = np.array([strike_dip_to_pole_vector(s, d) for s, d in zip(strike_ext, dip_ext)])
@@ -147,7 +147,7 @@ if link_google_sheets:
             avg_ext_strike, avg_ext_dip = (sig3_trd + 90) % 360, 90 - sig3_plg
 
             if has_plumose:
-                pitch_ext = df['Pitch_Plumose'].dropna().values
+                pitch_ext = df['Pitch_Plumose'].dropna().astype(float).values
                 avg_pitch = np.mean(pitch_ext)
                 sig1_plg, sig1_trd = pitch_to_trend_plunge(avg_ext_strike, avg_ext_dip, avg_pitch)
                 v_sig2 = np.cross(trend_plunge_to_vector(sig1_trd, sig1_plg), mean_v_ext_norm)
@@ -184,8 +184,9 @@ if link_google_sheets:
         # MODE 3: KINEMATIKA SESAR
         # ---------------------------------------------------------
         elif Mode_Analisis == "Kinematika Sesar (Fault Kinematics)":
-            strike_f, dip_f = df['Strike_Sesar'].dropna().values, df['Dip_Sesar'].dropna().values
-            pitch_f, sense_f = df['Pitch'].dropna().values, df['Sense'].dropna().values
+            strike_f, dip_f = df['Strike_Sesar'].dropna().astype(float).values, df['Dip_Sesar'].dropna().astype(float).values
+            pitch_f = df['Pitch'].dropna().astype(float).values
+            sense_f = df['Sense'].dropna().astype(str).values
 
             vecs_f = np.array([strike_dip_to_pole_vector(s, d) for s, d in zip(strike_f, dip_f)])
             mean_vf_norm = np.sum(vecs_f, axis=0) / np.linalg.norm(np.sum(vecs_f, axis=0))
