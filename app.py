@@ -56,6 +56,24 @@ Mode_Analisis = st.sidebar.selectbox(
 
 link_google_sheets = st.sidebar.text_input("🔗 Masukkan Link Google Sheets:", placeholder="Paste link di sini...")
 
+# --- MULAI DARI SINI TAMBAHAN TEMPLATE-NYA ---
+st.sidebar.markdown("---")
+st.sidebar.subheader("📄 Template Data")
+st.sidebar.info("Pilih format tabel standar sesuai dengan mode analisis Anda:")
+
+# Ganti dengan link Google Sheets lu yang asli
+st.sidebar.markdown("- [👉 Template Kekar Gerus Berpasangan](https://docs.google.com/spreadsheets/d/1T2296pJ1UBE5V5fpcUKeX235EbeKM3sNPJFYzohOU2g/edit?usp=drive_link)")
+st.sidebar.markdown("- [👉 Template Kekar Ekstensi (Mode I)](https://docs.google.com/spreadsheets/d/1qdr_HA0btAcLxe3vz_cogvLVazbU6vqNCBaVCxSlD1Q/edit?usp=drive_link)")
+st.sidebar.markdown("- [👉 Template Kinematika Sesar](https://docs.google.com/spreadsheets/d/13KssAmxUuDDf3cA9Euvr7-oJPFDK_GGPcvLCp_c79WA/edit?usp=drive_link)")
+
+st.sidebar.caption("💡 **Cara pakai:** Buka link -> Klik menu **File** -> **Make a copy** (Buat salinan) ke Drive Anda -> Isi dengan data pengukuran lapangan Anda.")
+
+# TAMBAHAN PERINGATAN AKSES PRIVATE
+st.sidebar.warning("⚠️ **SANGAT PENTING:**\nPastikan akses salinan Google Sheets Anda **TIDAK PRIVATE**. Ubah pengaturan Share/Bagikan menjadi **'Anyone with the link'** (Siapa saja yang memiliki link) agar mesin dapat membaca datanya.")
+
+st.sidebar.markdown("---")
+# --- SAMPAI SINI TAMBAHANNYA ---
+
 # ==========================================
 # LOGIKA UTAMA APLIKASI
 # ==========================================
