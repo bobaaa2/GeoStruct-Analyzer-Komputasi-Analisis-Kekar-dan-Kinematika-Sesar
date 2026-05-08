@@ -12,6 +12,17 @@ from collections import Counter
 st.set_page_config(page_title="GeoStruct Analyzer", page_icon="🧭", layout="wide")
 st.title("🧭 GeoStruct Analyzer")
 st.markdown("Aplikasi Komputasi Kinematika Struktur Geologi Berbasis Vektor 3D")
+
+# --- JURUS SAKTI NGILANGIN TULISAN ENTER (INJEKSI CSS) ---
+st.markdown("""
+    <style>
+    [data-testid="InputInstructions"] {
+        display: none !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+# ---------------------------------------------------------
+
 st.markdown("---")
 
 # ==========================================
