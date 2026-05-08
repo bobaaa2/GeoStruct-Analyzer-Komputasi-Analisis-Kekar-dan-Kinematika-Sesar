@@ -194,4 +194,21 @@ if tombol_mulai:
 
                     with col1:
                         fig, ax = plt.subplots(subplot_kw={'projection': 'stereonet'})
-                        ax.plane(s
+                        ax.plane(s_f, d_f, 'b-', alpha=0.15)
+                        ax.plane([s2_trd], [s2_plg], measurement='poles', linestyle='--', color='grey')
+                        ax.line(s1_plg, s1_trd, 'rs', markersize=10, label='Sigma 1 (P)')
+                        ax.line(s2_plg, s2_trd, '^', color='orange', markersize=10, label='Sigma 2 (B)')
+                        ax.line(s3_plg, s3_trd, 'bo', markersize=10, label='Sigma 3 (T)')
+                        plt.legend(loc='lower left', bbox_to_anchor=(1, 0.5)); st.pyplot(fig)
+
+                    with col2:
+                        st.subheader("📊 Analisis Sesar")
+                        st.write("Interpretasi Rezim (Hukum Anderson):")
+                        st.success(f"**{rezim}**")
+                        st.write(f"**$\sigma_1$ (P-Axis):** {s1_plg:.0f}° / {s1_trd:.0f}°")
+                        st.write(f"**$\sigma_2$ (B-Axis):** {s2_plg:.0f}° / {s2_trd:.0f}°")
+                        st.write(f"**$\sigma_3$ (T-Axis):** {s3_plg:.0f}° / {s3_trd:.0f}°")
+
+            except Exception as e: st.error(f"Error: {e}")
+    else: st.sidebar.error("Link Google Sheets kosong!")
+else: st.info("👈 Masukkan link data lapangan Anda untuk memulai.")
