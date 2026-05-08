@@ -13,7 +13,7 @@ st.set_page_config(page_title="GeoStruct Analyzer", page_icon="🧭", layout="wi
 st.title("🧭 GeoStruct Analyzer")
 st.markdown("Aplikasi Komputasi Kinematika Struktur Geologi Berbasis Vektor 3D")
 
-# --- INJEKSI CSS NGILANGIN TULISAN ENTER ---
+# --- INJEKSI CSS UNTUK TAMPILAN BERSIH ---
 st.markdown("""
     <style>
     [data-testid="InputInstructions"] {
@@ -25,7 +25,7 @@ st.markdown("""
 st.markdown("---")
 
 # ==========================================
-# FUNGSI KOMPUTASI VEKTOR
+# FUNGSI KOMPUTASI VEKTOR (THE ENGINE)
 # ==========================================
 def strike_dip_to_pole_vector(strike, dip):
     trd = np.radians((strike - 90) % 360)
@@ -54,7 +54,7 @@ def trend_plunge_to_vector(trend, plunge):
     return np.array([np.cos(trd) * np.cos(plg), np.sin(trd) * np.cos(plg), np.sin(plg)])
 
 # ==========================================
-# PANEL SAMPING (SIDEBAR UI)
+# PANEL SAMPING (SIDEBAR)
 # ==========================================
 st.sidebar.header("⚙️ Panel Pengaturan")
 Mode_Analisis = st.sidebar.selectbox(
@@ -71,14 +71,13 @@ with st.sidebar.form(key='form_input_data'):
 st.sidebar.markdown("---")
 st.sidebar.subheader("📄 Template Data")
 st.sidebar.info("- [👉 Template Kekar Gerus](https://docs.google.com/spreadsheets/d/1T2296pJ1UBE5V5fpcUKeX235EbeKM3sNPJFYzohOU2g/edit?usp=drive_link)\n- [👉 Template Kekar Ekstensi](https://docs.google.com/spreadsheets/d/1qdr_HA0btAcLxe3vz_cogvLVazbU6vqNCBaVCxSlD1Q/edit?usp=drive_link)\n- [👉 Template Kinematika Sesar](https://docs.google.com/spreadsheets/d/13KssAmxUuDDf3cA9Euvr7-oJPFDK_GGPcvLCp_c79WA/edit?usp=drive_link)")
-st.sidebar.warning("⚠️ Pastikan akses Google Sheets Anda **Anyone with the link**.")
 
 # ==========================================
 # LOGIKA UTAMA APLIKASI
 # ==========================================
 if tombol_mulai:
     if link_google_sheets != "":
-        with st.spinner("Mengekstrak data..."):
+        with st.spinner("Mengekstrak data dan menghitung vektor..."):
             try:
                 sheet_id = re.search(r'/d/([a-zA-Z0-9-_]+)', link_google_sheets).group(1)
                 csv_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv"
@@ -93,69 +92,75 @@ if tombol_mulai:
                 # MODE 1: KEKAR GERUS
                 # ---------------------------------------------------------
                 if Mode_Analisis == "Kekar Gerus Berpasangan (Conjugate Shear Joints)":
-                    set1_strike, set1_dip = df['Strike_1'].dropna().astype(float).values.copy(), df['Dip_1'].dropna().astype(float).values.copy()
-                    set2_strike, set2_dip = df['Strike_2'].dropna().astype(float).values.copy(), df['Dip_2'].dropna().astype(float).values.copy()
+                    s1, d1 = df['Strike_1'].dropna().astype(float).values.copy(), df['Dip_1'].dropna().astype(float).values.copy()
+                    s2, d2 = df['Strike_2'].dropna().astype(float).values.copy(), df['Dip_2'].dropna().astype(float).values.copy()
                     
-                    vecs1 = np.array([strike_dip_to_pole_vector(s, d) for s, d in zip(set1_strike, set1_dip)])
-                    mean_v1 = np.mean(vecs1, axis=0); mean_v1 /= np.linalg.norm(mean_v1)
-                    vecs2 = np.array([strike_dip_to_pole_vector(s, d) for s, d in zip(set2_strike, set2_dip)])
-                    mean_v2 = np.mean(vecs2, axis=0); mean_v2 /= np.linalg.norm(mean_v2)
+                    v1 = np.array([strike_dip_to_pole_vector(s, d) for s, d in zip(s1, d1)])
+                    m1 = np.mean(v1, axis=0); m1 /= np.linalg.norm(m1)
+                    v2 = np.array([strike_dip_to_pole_vector(s, d) for s, d in zip(s2, d2)])
+                    m2 = np.mean(v2, axis=0); m2 /= np.linalg.norm(m2)
                     
-                    if np.dot(mean_v1, mean_v2) < 0: mean_v2 = -mean_v2
-                    sig2_v = np.cross(mean_v1, mean_v2); sig2_plg, sig2_trd = vector_to_trend_plunge(sig2_v)
-                    
-                    ang = np.degrees(np.arccos(np.clip(np.dot(mean_v1, mean_v2), -1.0, 1.0)))
-                    b1_plg, b1_trd = vector_to_trend_plunge(mean_v1 + mean_v2)
-                    b2_plg, b2_trd = vector_to_trend_plunge(mean_v1 - mean_v2)
+                    if np.dot(m1, m2) < 0: m2 = -m2
+                    sig2_v = np.cross(m1, m2); sig2_plg, sig2_trd = vector_to_trend_plunge(sig2_v)
+                    ang = np.degrees(np.arccos(np.clip(np.dot(m1, m2), -1.0, 1.0)))
+                    b1_plg, b1_trd = vector_to_trend_plunge(m1 + m2)
+                    b2_plg, b2_trd = vector_to_trend_plunge(m1 - m2)
                     
                     if ang < 90: sig1_plg, sig1_trd, sig3_plg, sig3_trd = b2_plg, b2_trd, b1_plg, b1_trd
                     else: sig1_plg, sig1_trd, sig3_plg, sig3_trd = b1_plg, b1_trd, b2_plg, b2_trd
                     
-                    rezim = "Ekstensional" if sig1_plg >= 60 else ("Kompresional" if sig3_plg >= 60 else "Wrenching")
+                    rezim = "EKSTENSIONAL" if sig1_plg >= 60 else ("KOMPRESIONAL" if sig3_plg >= 60 else "WRENCHING (MENDATAR)")
                     
                     with col1:
                         fig, ax = plt.subplots(subplot_kw={'projection': 'stereonet'})
-                        ax.density_contourf(np.concatenate([set1_strike, set2_strike]), np.concatenate([set1_dip, set2_dip]), measurement='poles', cmap='YlOrRd', alpha=0.6)
-                        ax.pole(set1_strike, set1_dip, 'k.', markersize=2, alpha=0.3)
-                        ax.pole(set2_strike, set2_dip, 'k.', markersize=2, alpha=0.3)
-                        # Garis Putus-putus (Movement Plane)
-                        ax.plane([sig2_trd], [sig2_plg], measurement='poles', linestyle='--', color='grey', label='Movement Plane')
-                        ax.line(sig1_plg, sig1_trd, 'rs', label='Sigma 1 (Maks)')
-                        ax.line(sig2_plg, sig2_trd, '^', color='orange', label='Sigma 2 (Int)')
-                        ax.line(sig3_plg, sig3_trd, 'bo', label='Sigma 3 (Min)')
-                        plt.legend(loc='lower left', bbox_to_anchor=(1.05, 0.5)); st.pyplot(fig)
+                        ax.pole(s1, d1, 'k.', alpha=0.3); ax.pole(s2, d2, 'k.', alpha=0.3)
+                        ax.plane([sig2_trd], [sig2_plg], measurement='poles', linestyle='--', color='grey')
+                        ax.line(sig1_plg, sig1_trd, 'rs', markersize=10, label='Sigma 1')
+                        ax.line(sig2_plg, sig2_trd, '^', color='orange', markersize=10, label='Sigma 2')
+                        ax.line(sig3_plg, sig3_trd, 'bo', markersize=10, label='Sigma 3')
+                        plt.legend(loc='lower left', bbox_to_anchor=(1, 0.5)); st.pyplot(fig)
+
+                    with col2:
+                        st.subheader("📊 Analisis Kekar Gerus")
+                        st.write("Rezim Tektonik Dominan:")
+                        st.success(f"**{rezim}**")
+                        st.write(f"**$\sigma_1$ (Maks):** {sig1_plg:.0f}° / {sig1_trd:.0f}°")
+                        st.write(f"**$\sigma_2$ (Int):** {sig2_plg:.0f}° / {sig2_trd:.0f}°")
+                        st.write(f"**$\sigma_3$ (Min):** {sig3_plg:.0f}° / {sig3_trd:.0f}°")
 
                 # ---------------------------------------------------------
                 # MODE 2: KEKAR EKSTENSI
                 # ---------------------------------------------------------
                 elif Mode_Analisis == "Kekar Ekstensi (Extension Joints)":
                     s_e, d_e = df['Strike_Ekstensi'].dropna().astype(float).values.copy(), df['Dip_Ekstensi'].dropna().astype(float).values.copy()
-                    has_plumose = 'Pitch_Plumose' in df.columns and not df['Pitch_Plumose'].dropna().empty
-                    
                     v_e = np.array([strike_dip_to_pole_vector(s, d) for s, d in zip(s_e, d_e)])
                     m_e = np.mean(v_e, axis=0); m_e /= np.linalg.norm(m_e)
                     s3_plg, s3_trd = vector_to_trend_plunge(m_e)
                     
-                    with col1: 
+                    with col1:
                         fig, ax = plt.subplots(subplot_kw={'projection': 'stereonet'})
-                        ax.pole(s_e, d_e, 'k.', markersize=4, alpha=0.5)
-                        ax.line(s3_plg, s3_trd, 'bo', markersize=10, label='Sigma 3 (Min)')
+                        ax.pole(s_e, d_e, 'k.', alpha=0.5)
+                        ax.line(s3_plg, s3_trd, 'bo', markersize=10, label='Sigma 3')
                         
-                        if has_plumose:
+                        if 'Pitch_Plumose' in df.columns and not df['Pitch_Plumose'].dropna().empty:
                             p_p = df['Pitch_Plumose'].dropna().astype(float).values.copy()
-                            avg_s, avg_d = (s3_trd + 90) % 360, 90 - s3_plg
-                            s1_plg, s1_trd = pitch_to_trend_plunge(avg_s, avg_d, np.mean(p_p))
+                            s1_plg, s1_trd = pitch_to_trend_plunge((s3_trd+90)%360, 90-s3_plg, np.mean(p_p))
                             v2 = np.cross(trend_plunge_to_vector(s1_trd, s1_plg), m_e)
                             s2_plg, s2_trd = vector_to_trend_plunge(v2)
-                            # Garis Putus-putus
-                            ax.plane([s2_trd], [s2_plg], measurement='poles', linestyle='--', color='grey')
-                            ax.line(s1_plg, s1_trd, 'rs', markersize=10, label='Sigma 1 (Maks)')
-                            ax.line(s2_plg, s2_trd, '^', color='orange', markersize=10, label='Sigma 2 (Int)')
-                        
-                        plt.legend(loc='lower left', bbox_to_anchor=(1.05, 0.5)); st.pyplot(fig)
+                            ax.plane([s2_trd], [s2_plg], measurement='poles', linestyle='--')
+                            ax.line(s1_plg, s1_trd, 'rs', label='Sigma 1')
+                            ax.line(s2_plg, s2_trd, '^', color='orange', label='Sigma 2')
+                        plt.legend(loc='lower left', bbox_to_anchor=(1, 0.5)); st.pyplot(fig)
+
+                    with col2:
+                        st.subheader("📊 Analisis Kekar Ekstensi")
+                        st.write(f"**$\sigma_3$ (Arah Tarikan):** {s3_plg:.0f}° / {s3_trd:.0f}°")
+                        if 's1_plg' in locals():
+                            st.write(f"**$\sigma_1$ (Rambatan):** {s1_plg:.0f}° / {s1_trd:.0f}°")
+                            st.write(f"**$\sigma_2$ (Int):** {s2_plg:.0f}° / {s2_trd:.0f}°")
 
                 # ---------------------------------------------------------
-                # MODE 3: KINEMATIKA SESAR
+                # MODE 3: KINEMATIKA SESAR (ANDERSONIAN COMPLIANT)
                 # ---------------------------------------------------------
                 elif Mode_Analisis == "Kinematika Sesar (Fault Kinematics)":
                     s_f, d_f = df['Strike_Sesar'].dropna().astype(float).values.copy(), df['Dip_Sesar'].dropna().astype(float).values.copy()
@@ -180,16 +185,13 @@ if tombol_mulai:
                     s3_v = np.mean(t_vecs, axis=0); s3_v /= np.linalg.norm(s3_v); s3_plg, s3_trd = vector_to_trend_plunge(s3_v)
                     s2_v = np.mean(b_vecs, axis=0); s2_v /= np.linalg.norm(s2_v); s2_plg, s2_trd = vector_to_trend_plunge(s2_v)
 
+                    # LOGIKA ANDERSON: Cek sumbu mana yang paling vertikal (Plunge paling tinggi)
+                    # Sumbu yang mendekati pusat stereonet adalah yang Plunge-nya mendekati 90 derajat.
+                    if s1_plg >= 60: rezim = "EKSTENSIONAL (SESAR NORMAL)"
+                    elif s3_plg >= 60: rezim = "KOMPRESIONAL (SESAR NAIK)"
+                    elif s2_plg >= 60: rezim = "WRENCHING (SESAR MENDATAR)"
+                    else: rezim = "REZIM OBLIK (CAMPURAN)"
+
                     with col1:
                         fig, ax = plt.subplots(subplot_kw={'projection': 'stereonet'})
-                        ax.plane(s_f, d_f, 'b-', alpha=0.15)
-                        for s, d, p in zip(s_f, d_f, p_f): ax.rake(s, d, p, 'r^', markersize=5, alpha=0.4)
-                        # Garis Putus-putus (Movement Plane)
-                        ax.plane([s2_trd], [s2_plg], measurement='poles', linestyle='--', color='grey', label='Movement Plane')
-                        ax.line(s1_plg, s1_trd, 'rs', markersize=10, label='Sigma 1 (P)')
-                        ax.line(s2_plg, s2_trd, '^', color='orange', markersize=10, label='Sigma 2 (B)')
-                        ax.line(s3_plg, s3_trd, 'bo', markersize=10, label='Sigma 3 (T)')
-                        plt.legend(loc='lower left', bbox_to_anchor=(1.05, 0.5)); ax.grid(True); st.pyplot(fig)
-
-            except Exception as e: st.error(f"Error: {e}")
-    else: st.sidebar.error("Link kosong!")
+                        ax.plane(s
