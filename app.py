@@ -58,7 +58,7 @@ Mode_Analisis = st.sidebar.selectbox(
 link_google_sheets = st.sidebar.text_input("🔗 Masukkan Link Google Sheets:", placeholder="Paste link di sini...")
 
 # 2. Tombol Mulai langsung persis di bawah kotak Link
-tombol_mulai = st.sidebar.button("🚀 Mulai Analisis", type="primary")
+tombol_mulai = st.sidebar.button("Mulai Analisis", type="primary")
 
 # 3. Template Data ditaruh paling bawah di sidebar
 st.sidebar.markdown("---")
