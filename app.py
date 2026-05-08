@@ -114,8 +114,11 @@ if tombol_mulai:
                         ax.line(sig1_plg, sig1_trd, 'rs', markersize=10, label='Sigma 1')
                         ax.line(sig2_plg, sig2_trd, '^', color='orange', markersize=10, label='Sigma 2')
                         ax.line(sig3_plg, sig3_trd, 'bo', markersize=10, label='Sigma 3')
-                        # LEGEND DIKECILIN DISINI
-                        plt.legend(loc='lower left', bbox_to_anchor=(1, 0.5), prop={'size': 5}); ax.grid(True); st.pyplot(fig)
+                        
+                        # PENGEKECILAN EKSTREM DISINI
+                        plt.legend(loc='lower left', bbox_to_anchor=(1, 0.5), 
+                                   prop={'size': 6}, markerscale=0.6, labelspacing=0.2, handletextpad=0.3)
+                        ax.grid(True); st.pyplot(fig)
                     with col2:
                         st.subheader("📊 Analisis Kekar Gerus")
                         st.write("Rezim Tektonik Dominan:")
@@ -140,8 +143,11 @@ if tombol_mulai:
                             v2 = np.cross(trend_plunge_to_vector(s1_trd, s1_plg), m_e); s2_plg, s2_trd = vector_to_trend_plunge(v2)
                             ax.plane([(s2_trd + 90) % 360], [90 - s2_plg], linestyle='--', color='grey', label='Movement Plane')
                             ax.line(s1_plg, s1_trd, 'rs', label='Sigma 1'); ax.line(s2_plg, s2_trd, '^', color='orange', label='Sigma 2')
-                        # LEGEND DIKECILIN DISINI
-                        plt.legend(loc='lower left', bbox_to_anchor=(1, 0.5), prop={'size': 8}); ax.grid(True); st.pyplot(fig)
+                        
+                        # PENGEKECILAN EKSTREM DISINI
+                        plt.legend(loc='lower left', bbox_to_anchor=(1, 0.5), 
+                                   prop={'size': 6}, markerscale=0.6, labelspacing=0.2, handletextpad=0.3)
+                        ax.grid(True); st.pyplot(fig)
                     with col2:
                         st.subheader("📊 Analisis Kekar Ekstensi")
                         st.write(f"**$\sigma_3$ (Arah Tarikan):** {s3_plg:.0f}° / {s3_trd:.0f}°")
@@ -176,8 +182,11 @@ if tombol_mulai:
                         ax.line(s1_plg, s1_trd, 'rs', markersize=10, label='Sigma 1 (P)')
                         ax.line(s2_plg, s2_trd, '^', color='orange', markersize=10, label='Sigma 2 (B)')
                         ax.line(s3_plg, s3_trd, 'bo', markersize=10, label='Sigma 3 (T)')
-                        # LEGEND DIKECILIN DISINI
-                        plt.legend(loc='lower left', bbox_to_anchor=(1, 0.5), prop={'size': 8}); ax.grid(True); st.pyplot(fig)
+                        
+                        # PENGEKECILAN EKSTREM DISINI
+                        plt.legend(loc='lower left', bbox_to_anchor=(1, 0.5), 
+                                   prop={'size': 6}, markerscale=0.6, labelspacing=0.2, handletextpad=0.3)
+                        ax.grid(True); st.pyplot(fig)
                     with col2:
                         st.subheader("📊 Analisis Sesar")
                         st.write("Rezim Dominan:")
