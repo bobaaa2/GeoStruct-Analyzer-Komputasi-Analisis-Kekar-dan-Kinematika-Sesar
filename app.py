@@ -115,7 +115,7 @@ if tombol_mulai:
                         ax.line(sig2_plg, sig2_trd, '^', color='orange', markersize=10, label='Sigma 2')
                         ax.line(sig3_plg, sig3_trd, 'bo', markersize=10, label='Sigma 3')
                         # LEGEND DIKECILIN DISINI
-                        plt.legend(loc='lower left', bbox_to_anchor=(1, 0.5), prop={'size': 8}); ax.grid(True); st.pyplot(fig)
+                        plt.legend(loc='lower left', bbox_to_anchor=(1, 0.5), prop={'size': 5}); ax.grid(True); st.pyplot(fig)
                     with col2:
                         st.subheader("📊 Analisis Kekar Gerus")
                         st.write("Rezim Tektonik Dominan:")
