@@ -161,3 +161,54 @@ if tombol_mulai:
                         if 's1_plg' in locals():
                             st.write(f"**$\sigma_1$ (Rambatan):** {s1_plg:.0f}° / {s1_trd:.0f}°")
                             st.write(f"**$\sigma_2$ (Int):** {s2_plg:.0f}° / {s2_trd:.0f}°")
+
+                # ---------------------------------------------------------
+                # MODE 3: KINEMATIKA SESAR
+                # ---------------------------------------------------------
+                elif Mode_Analisis == "Kinematika Sesar (Fault Kinematics)":
+                    s_f, d_f = df['Strike_Sesar'].dropna().astype(float).values.copy(), df['Dip_Sesar'].dropna().astype(float).values.copy()
+                    p_f, sense_f = df['Pitch'].dropna().astype(float).values.copy(), df['Sense'].dropna().astype(str).values.copy()
+                    
+                    p_vecs, t_vecs, b_vecs = [], [], []
+                    for s, d, p, sense in zip(s_f, d_f, p_f, sense_f):
+                        n = strike_dip_to_pole_vector(s, d)
+                        plg_s, trd_s = pitch_to_trend_plunge(s, d, p)
+                        slk = trend_plunge_to_vector(trd_s, plg_s)
+                        if any(x in sense.lower() for x in ['naik', 'reverse', 'thrust']):
+                            p_axis = slk + n; t_axis = slk - n
+                        else:
+                            p_axis = slk - n; t_axis = slk + n
+                        p_axis /= np.linalg.norm(p_axis); t_axis /= np.linalg.norm(t_axis)
+                        b_axis = np.cross(p_axis, t_axis); b_axis /= np.linalg.norm(b_axis)
+                        p_vecs.append(p_axis); t_vecs.append(t_axis); b_vecs.append(b_axis)
+
+                    s1_v = np.mean(p_vecs, axis=0); s1_v /= np.linalg.norm(s1_v); s1_plg, s1_trd = vector_to_trend_plunge(s1_v)
+                    s3_v = np.mean(t_vecs, axis=0); s3_v /= np.linalg.norm(s3_v); s3_plg, s3_trd = vector_to_trend_plunge(s3_v)
+                    s2_v = np.mean(b_vecs, axis=0); s2_v /= np.linalg.norm(s2_v); s2_plg, s2_trd = vector_to_trend_plunge(s2_v)
+
+                    if s1_plg >= 60: rezim = "EKSTENSIONAL (SESAR NORMAL)"
+                    elif s3_plg >= 60: rezim = "KOMPRESIONAL (SESAR NAIK)"
+                    elif s2_plg >= 60: rezim = "WRENCHING (SESAR MENDATAR)"
+                    else: rezim = "REZIM OBLIK (CAMPURAN)"
+
+                    with col1:
+                        fig, ax = plt.subplots(subplot_kw={'projection': 'stereonet'})
+                        ax.plane(s_f, d_f, 'b-', alpha=0.15)
+                        # PERBAIKAN FATAL DISINI: Menghilangkan 'measurement' kwarg yang bikin crash
+                        ax.plane([(s2_trd + 90) % 360], [90 - s2_plg], linestyle='--', color='grey', label='Movement Plane')
+                        ax.line(s1_plg, s1_trd, 'rs', markersize=10, label='Sigma 1 (P)')
+                        ax.line(s2_plg, s2_trd, '^', color='orange', markersize=10, label='Sigma 2 (B)')
+                        ax.line(s3_plg, s3_trd, 'bo', markersize=10, label='Sigma 3 (T)')
+                        plt.legend(loc='lower left', bbox_to_anchor=(1, 0.5)); ax.grid(True); st.pyplot(fig)
+
+                    with col2:
+                        st.subheader("📊 Analisis Sesar")
+                        st.write("Rezim Dominan (Hukum Anderson):")
+                        st.success(f"**{rezim}**")
+                        st.write(f"**$\sigma_1$ (P-Axis):** {s1_plg:.0f}° / {s1_trd:.0f}°")
+                        st.write(f"**$\sigma_2$ (B-Axis):** {s2_plg:.0f}° / {s2_trd:.0f}°")
+                        st.write(f"**$\sigma_3$ (T-Axis):** {s3_plg:.0f}° / {s3_trd:.0f}°")
+
+            except Exception as e: st.error(f"Error: {e}")
+    else: st.sidebar.error("Link Google Sheets kosong!")
+else: st.info("👈 Masukkan link data lapangan untuk mulai.")
