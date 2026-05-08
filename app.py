@@ -69,7 +69,7 @@ st.sidebar.markdown("- [👉 Template Kinematika Sesar](https://docs.google.com/
 st.sidebar.caption("💡 **Cara pakai:** Buka link -> Klik menu **File** -> **Make a copy** (Buat salinan) ke Drive Anda -> Isi dengan data pengukuran lapangan Anda.")
 
 # TAMBAHAN PERINGATAN AKSES PRIVATE
-st.sidebar.warning("⚠️ **SANGAT PENTING:**\nPastikan akses salinan Google Sheets Anda **TIDAK PRIVATE**. Ubah pengaturan Share/Bagikan menjadi **'Anyone with the link'** (Siapa saja yang memiliki link) agar mesin dapat membaca datanya.")
+st.sidebar.warning("⚠️ **PENTING!!!:**\nPastikan akses salinan Google Sheets Anda **TIDAK PRIVATE**. Ubah pengaturan Share/Bagikan menjadi **'Anyone with the link'** (Siapa saja yang memiliki link) agar mesin dapat membaca datanya.")
 
 st.sidebar.markdown("---")
 # --- SAMPAI SINI TAMBAHANNYA ---
