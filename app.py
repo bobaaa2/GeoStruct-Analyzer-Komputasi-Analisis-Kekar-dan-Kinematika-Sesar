@@ -110,22 +110,15 @@ if tombol_mulai:
                     with col1:
                         fig, ax = plt.subplots(subplot_kw={'projection': 'stereonet'})
                         ax.pole(s1, d1, 'k.', alpha=0.3); ax.pole(s2, d2, 'k.', alpha=0.3)
-                        ax.plane([(sig2_trd + 90) % 360], [90 - sig2_plg], linestyle='--', color='grey', label='Movement Plane')
-                        ax.line(sig1_plg, sig1_trd, 'rs', markersize=10, label='Sigma 1')
-                        ax.line(sig2_plg, sig2_trd, '^', color='orange', markersize=10, label='Sigma 2')
-                        ax.line(sig3_plg, sig3_trd, 'bo', markersize=10, label='Sigma 3')
+                        ax.plane([(sig2_trd + 90) % 360], [90 - sig2_plg], linestyle='--', color='grey', label='M-Plane')
+                        ax.line(sig1_plg, sig1_trd, 'rs', markersize=8, label='S1')
+                        ax.line(sig2_plg, sig2_trd, '^', color='orange', markersize=8, label='S2')
+                        ax.line(sig3_plg, sig3_trd, 'bo', markersize=8, label='S3')
                         
-                        # PENGEKECILAN EKSTREM DISINI
-                        plt.legend(loc='lower left', bbox_to_anchor=(1, 0.5), 
-                                   prop={'size': 6}, markerscale=0.6, labelspacing=0.2, handletextpad=0.3)
+                        # STRATEGI BARU: HORIZONTAL DI BAWAH, TANPA BINGKAI
+                        plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), 
+                                   ncol=4, frameon=False, prop={'size': 7}, handletextpad=0.1)
                         ax.grid(True); st.pyplot(fig)
-                    with col2:
-                        st.subheader("📊 Analisis Kekar Gerus")
-                        st.write("Rezim Tektonik Dominan:")
-                        st.success(f"**{rezim}**")
-                        st.write(f"**$\sigma_1$:** {sig1_plg:.0f}° / {sig1_trd:.0f}°")
-                        st.write(f"**$\sigma_2$:** {sig2_plg:.0f}° / {sig2_trd:.0f}°")
-                        st.write(f"**$\sigma_3$:** {sig3_plg:.0f}° / {sig3_trd:.0f}°")
 
                 # ---------------------------------------------------------
                 # MODE 2: KEKAR EKSTENSI
@@ -136,21 +129,17 @@ if tombol_mulai:
                     m_e = np.mean(v_e, axis=0); m_e /= np.linalg.norm(m_e); s3_plg, s3_trd = vector_to_trend_plunge(m_e)
                     with col1:
                         fig, ax = plt.subplots(subplot_kw={'projection': 'stereonet'})
-                        ax.pole(s_e, d_e, 'k.', alpha=0.5); ax.line(s3_plg, s3_trd, 'bo', markersize=10, label='Sigma 3')
+                        ax.pole(s_e, d_e, 'k.', alpha=0.5); ax.line(s3_plg, s3_trd, 'bo', markersize=8, label='S3')
                         if 'Pitch_Plumose' in df.columns and not df['Pitch_Plumose'].dropna().empty:
                             p_p = df['Pitch_Plumose'].dropna().astype(float).values.copy()
                             s1_plg, s1_trd = pitch_to_trend_plunge((s3_trd+90)%360, 90-s3_plg, np.mean(p_p))
                             v2 = np.cross(trend_plunge_to_vector(s1_trd, s1_plg), m_e); s2_plg, s2_trd = vector_to_trend_plunge(v2)
-                            ax.plane([(s2_trd + 90) % 360], [90 - s2_plg], linestyle='--', color='grey', label='Movement Plane')
-                            ax.line(s1_plg, s1_trd, 'rs', label='Sigma 1'); ax.line(s2_plg, s2_trd, '^', color='orange', label='Sigma 2')
+                            ax.plane([(s2_trd + 90) % 360], [90 - s2_plg], linestyle='--', color='grey', label='M-Plane')
+                            ax.line(s1_plg, s1_trd, 'rs', label='S1'); ax.line(s2_plg, s2_trd, '^', color='orange', label='S2')
                         
-                        # PENGEKECILAN EKSTREM DISINI
-                        plt.legend(loc='lower left', bbox_to_anchor=(1, 0.5), 
-                                   prop={'size': 6}, markerscale=0.6, labelspacing=0.2, handletextpad=0.3)
+                        plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), 
+                                   ncol=4, frameon=False, prop={'size': 7}, handletextpad=0.1)
                         ax.grid(True); st.pyplot(fig)
-                    with col2:
-                        st.subheader("📊 Analisis Kekar Ekstensi")
-                        st.write(f"**$\sigma_3$ (Arah Tarikan):** {s3_plg:.0f}° / {s3_trd:.0f}°")
 
                 # ---------------------------------------------------------
                 # MODE 3: KINEMATIKA SESAR
@@ -170,22 +159,19 @@ if tombol_mulai:
                     s1_v = np.mean(p_vecs, axis=0); s1_v /= np.linalg.norm(s1_v); s1_plg, s1_trd = vector_to_trend_plunge(s1_v)
                     s3_v = np.mean(t_vecs, axis=0); s3_v /= np.linalg.norm(s3_v); s3_plg, s3_trd = vector_to_trend_plunge(s3_v)
                     s2_v = np.mean(b_vecs, axis=0); s2_v /= np.linalg.norm(s2_v); s2_plg, s2_trd = vector_to_trend_plunge(s2_v)
-                    if s1_plg >= 60: rezim = "EKSTENSIONAL (SESAR NORMAL)"
-                    elif s3_plg >= 60: rezim = "KOMPRESIONAL (SESAR NAIK)"
-                    elif s2_plg >= 60: rezim = "WRENCHING (SESAR MENDATAR)"
-                    else: rezim = "REZIM OBLIK (CAMPURAN)"
+                    if s1_plg >= 60: rezim = "SESAR NORMAL"
+                    elif s3_plg >= 60: rezim = "SESAR NAIK"
+                    elif s2_plg >= 60: rezim = "SESAR MENDATAR"
+                    else: rezim = "REZIM OBLIK"
 
                     with col1:
                         fig, ax = plt.subplots(subplot_kw={'projection': 'stereonet'})
                         ax.plane(s_f, d_f, 'b-', alpha=0.15)
-                        ax.plane([(s2_trd + 90) % 360], [90 - s2_plg], linestyle='--', color='grey', label='Movement Plane')
-                        ax.line(s1_plg, s1_trd, 'rs', markersize=10, label='Sigma 1 (P)')
-                        ax.line(s2_plg, s2_trd, '^', color='orange', markersize=10, label='Sigma 2 (B)')
-                        ax.line(s3_plg, s3_trd, 'bo', markersize=10, label='Sigma 3 (T)')
+                        ax.plane([(s2_trd + 90) % 360], [90 - s2_plg], linestyle='--', color='grey', label='M-Plane')
+                        ax.line(s1_plg, s1_trd, 'rs', label='S1'); ax.line(s2_plg, s2_trd, '^', color='orange', label='S2'); ax.line(s3_plg, s3_trd, 'bo', label='S3')
                         
-                        # PENGEKECILAN EKSTREM DISINI
-                        plt.legend(loc='lower left', bbox_to_anchor=(1, 0.5), 
-                                   prop={'size': 6}, markerscale=0.6, labelspacing=0.2, handletextpad=0.3)
+                        plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), 
+                                   ncol=4, frameon=False, prop={'size': 7}, handletextpad=0.1)
                         ax.grid(True); st.pyplot(fig)
                     with col2:
                         st.subheader("📊 Analisis Sesar")
